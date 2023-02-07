@@ -1,0 +1,28 @@
+{- Exercício 06
+Dado um vetor de números inteiros, escreva a função quicksort que devolve um permutação
+do vetor com os elementos em ordem crescente.
+> quicksort [5, 4, 3, 2, 1]
+[1,2,3,4,5]
+> quicksort [22, 55, 44, 11, 33]
+[11,22,33,44,55] -}
+
+menorIgual :: Int -> [Int] -> [Int]
+menorIgual = \v -> \list ->
+    case list of
+        [] -> []
+        x:xs | x<=v -> x:menorIgual v xs
+        _:xs -> menorIgual v xs
+
+maiorQue :: Int -> [Int] -> [Int]
+maiorQue = \v -> \list ->
+    case list of
+        [] -> []
+        x:xs | x>v -> x:maiorQue v xs
+        _:xs -> maiorQue v xs
+
+quicksort :: [Int] -> [Int]
+quicksort = \list ->
+    case list of
+        [] -> []
+        x:xs -> 
+            quicksort (menorIgual x xs) ++ x: quicksort (maiorQue x xs)

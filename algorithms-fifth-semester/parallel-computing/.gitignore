@@ -1,0 +1,15 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+
+# Datasource local storidade ignored files
+/dataSources/
+/dataSources.local.xml
+/httpRequests/
+
+.DS_Store
+remembering-languidade-c/exercicio2/CMakeLists.txt
+cmake-build-debug
+/**/.idea/*
+CMakeFiles
+CMakeCache.txt

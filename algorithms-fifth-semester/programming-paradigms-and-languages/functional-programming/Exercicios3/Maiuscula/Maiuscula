@@ -1,0 +1,12 @@
+import Data.Char
+
+{- Exercício 03
+Escreva uma função que converta uma cadeia de caracteres em maiúsculas (Use a função toUpper() do módulo Char).
+> strUpper "ola mundo"
+"OLA MUNDO"
+> strUpper "para maiusculo"
+"PARA MAIUSCULO"
+-}
+
+strUpper :: String -> String
+strUpper palavra = [toUpper str | str <- palavra]

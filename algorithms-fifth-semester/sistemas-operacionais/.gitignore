@@ -1,0 +1,23 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+/httpRequests/
+
+.DS_Store
+/c++exercises/.idea/vcs.xml
+lab02a-process/lab02a-5-process-chain-creation/CMakeLists.txt
+cmake-build-debug
+/**/.idea/*
+CMakeFiles
+CMakeCache.txt
+CMakeLists.txt
+
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
