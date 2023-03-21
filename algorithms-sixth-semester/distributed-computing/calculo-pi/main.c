@@ -14,8 +14,9 @@
 int num_ptos[10]; // Total de pontos da thread
 int num_ptos_cir[10]; // Pontos no circulo
 int numinter = 1000;
+double quad;
 
-void *calcula(void *param); // sorteia e verifica os pontos pela thread
+void *calculatePi(void *param); // sorteia e verifica os pontos pela thread
 
 void *readFile(int data[], int numinter, int myid);
 
@@ -55,7 +56,7 @@ int main(int argc, char *argv[]) {
         int *j = malloc(sizeof(int));
         *j = i;
         // cria a i-esima thread
-        pthread_create(&tid[i], NULL, calcula, (void *) j);
+        pthread_create(&tid[i], NULL, calculatePi, (void *) j);
     }
 
     // Para cada thread
@@ -97,10 +98,10 @@ void *readFile(int data[], int numinter, int myid) {
     }
 }
 
-void *calcula(void *param) {
+void *calculatePi(void *param) {
     int i;
     unsigned int thrnum = *((unsigned int *) param); // O número da thread ()
-    double x, y, quad;
+    double x, y;
     num_ptos[thrnum] = 0;
     num_ptos_cir[thrnum] = 0;
 
