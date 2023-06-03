@@ -20,24 +20,37 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
-#include <memory.h>
 #include <string.h>
 
+#define MAX_VERTICES 20
 
 /**
  * Estrutura de dados para representar grafos
  */
-typedef struct aresta { /* Celula de uma lista de arestas */
+typedef struct aresta { /** Celula de uma lista de arestas */
     int id;
     struct aresta *p;
 } Aresta;
 
-typedef struct vert {  /* Cada vertice tem um ponteiro para uma lista de arestas incidentes nele */
+typedef struct vert { /** Cada vertice tem um ponteiro para uma lista de arestas
+                         incidentes nele */
     int id;
     char nome[50];
     Aresta *prim;
 } Vert;
+
+typedef struct {
+    int vertices[MAX_VERTICES];
+    int count;
+} VertexSet;
+
+typedef struct {
+    VertexSet panelinhas[MAX_VERTICES];
+    int count;
+} Panelinhas;
+
+int maiorPanelinha;
+Panelinhas M;
 
 /**
  * Declaracoes das funcoes para manipulacao de grafos
@@ -60,7 +73,21 @@ void retornaUmAmigo(Vert G[], int ordem);
 
 void retornaMaisAmigos(Vert G[], int ordem);
 
+void addVertex(VertexSet *set, int vertex);
+
+void removeVertex(VertexSet *set, int vertex);
+
+void inicializaVertex(VertexSet *set);
+
 void retornaQuantidadeAmigos(int v, Vert G[], int ordemG);
+
+void bronKerbosch(Vert *G, int graph[MAX_VERTICES][MAX_VERTICES], VertexSet R, VertexSet P, VertexSet X);
+
+void transformaGrafoMatriz(Vert *G, int graph[MAX_VERTICES][MAX_VERTICES], int ordemG);
+
+void imprimeMaiorPanelinha(Panelinhas M, int maiorPanelinha, Vert *G);
+
+void retornaPanelinha(Panelinhas M, Vert *G, int v);
 
 /**
  * Criacao de um grafo com ordem predefinida (passada como argumento),
@@ -68,11 +95,12 @@ void retornaQuantidadeAmigos(int v, Vert G[], int ordemG);
  */
 void criaGrafo(Vert **G, int ordem) {
     int i;
-    *G = (Vert *) malloc(sizeof(Vert) * ordem); /** Alcacao dinamica de um vetor de vertices */
+    *G = (Vert *) malloc(sizeof(Vert) *
+                         ordem); /** Alcacao dinamica de um vetor de vertices */
 
     for (i = 0; i < ordem; i++) {
         (*G)[i].id = i;
-        (*G)[i].prim = NULL;    /** Cada vertice sem nenua aresta incidente */
+        (*G)[i].prim = NULL; /** Cada vertice sem nenua aresta incidente */
     }
 }
 
@@ -83,7 +111,8 @@ void destroiGrafo(Vert **G, int ordem) {
     int i;
     Aresta *a, *n;
 
-    for (i = 0; i < ordem; i++) { /** Remove lista de adjacencia de cada vertice */
+    for (i = 0; i < ordem;
+         i++) { /** Remove lista de adjacencia de cada vertice */
         a = (*G)[i].prim;
         while (a != NULL) {
             n = a->p;
@@ -114,7 +143,8 @@ int acrescentaAresta(Vert G[], int ordem, int v1, int v2) {
     A1->p = G[v1].prim;
     G[v1].prim = A1;
 
-    if (v1 == v2) return 1; /* Aresta e� um laco */
+    if (v1 == v2)
+        return 1; /* Aresta e� um laco */
 
     /** Acrescenta aresta na lista do vertice v2 se v2 != v1 */
     A2 = (Aresta *) malloc(sizeof(Aresta));
@@ -155,7 +185,8 @@ int calculaGrau(Vert G[], int ordem, int v) {
     aux = G[v].prim;
     /** Percorre a lista de arestas que incidem em v, contando qtd. */
     for (i = 0; aux != NULL; aux = aux->p, i++)
-        if (aux->id == v) i++;  /* Se for laco, conta 2 vezes */
+        if (aux->id == v)
+            i++; /** Se for laco, conta 2 vezes */
     return (i);
 }
 
@@ -194,7 +225,7 @@ void retornaMaisAmigos(Vert G[], int ordem) {
     printf("\nUsuários com a maior quantidade de amigos:\n");
     int max = calculaGrauMax(G, ordem);
     for (int i = 0; i < ordem; i++) {
-        if (i == max) {
+        if (calculaGrau(G, ordem, i) == max) {
             printf("%s\n", G[i].nome);
         }
     }
@@ -204,6 +235,140 @@ void retornaQuantidadeAmigos(int v, Vert G[], int ordemG) {
     for (v = 0; v < ordemG; v++) {
         int i = calculaGrau(G, ordemG, v);
         printf("\n%s tem %d amigos", G[v].nome, i);
+    }
+    printf("\n");
+}
+
+void inicializaVertex(VertexSet *set) {
+    set->count = 0;
+}
+
+void addVertex(VertexSet *set, int vertex) {
+    set->vertices[set->count++] = vertex;
+}
+
+void removeVertex(VertexSet *set, int vertex) {
+    int i, j;
+    for (i = 0; i < set->count; i++) {
+        if (set->vertices[i] == vertex) {
+            for (j = i; j < set->count - 1; j++) {
+                set->vertices[j] = set->vertices[j + 1];
+            }
+            set->count--;
+            return;
+        }
+    }
+}
+
+void bronKerbosch(Vert *G, int graph[MAX_VERTICES][MAX_VERTICES], VertexSet R, VertexSet P, VertexSet X) {
+    if (P.count == 0 && X.count == 0) {
+        if (R.count >= 3) { /** Condição para "panelinhas" */
+            printf("\nPanelinha encontrada: \n");
+            int i;
+            for (i = 0; i < R.count; i++) {
+                if (R.count < M.panelinhas[M.count].count) {
+                    maiorPanelinha = M.panelinhas[M.count].count;
+                } else {
+                    maiorPanelinha = R.count;
+                }
+                printf("%s \n", G[R.vertices[i]].nome);
+                M.panelinhas[M.count].vertices[i] = G[R.vertices[i]].id;
+                M.panelinhas[M.count].count = R.count;
+            }
+            printf("\n");
+            M.count++;
+        }
+        return;
+    }
+
+    VertexSet Pcopy = P;
+    int pivotVertex = Pcopy.vertices[0];
+    int i;
+    for (i = 0; i < Pcopy.count; i++) {
+        int vertex = Pcopy.vertices[i];
+        if (graph[pivotVertex][vertex]) {
+            continue;
+        }
+
+        VertexSet Rnew = R;
+        addVertex(&Rnew, vertex);
+        VertexSet Pnew;
+        inicializaVertex(&Pnew);
+        VertexSet Xnew;
+        inicializaVertex(&Xnew);
+
+        int j;
+        for (j = 0; j < P.count; j++) {
+            int v = P.vertices[j];
+            if (graph[vertex][v]) {
+                addVertex(&Pnew, v);
+            }
+        }
+
+        for (j = 0; j < X.count; j++) {
+            int v = X.vertices[j];
+            if (graph[vertex][v]) {
+                addVertex(&Xnew, v);
+            }
+        }
+
+        bronKerbosch(G, graph, Rnew, Pnew, Xnew);
+
+        removeVertex(&P, vertex);
+        addVertex(&X, vertex);
+    }
+}
+
+void transformaGrafoMatriz(Vert *G, int graph[MAX_VERTICES][MAX_VERTICES], int ordemG) {
+    int i, j;
+    Aresta *aux;
+
+    for (i = 0; i < ordemG; i++) {
+        for (j = 0; j < ordemG; j++) {
+            graph[i][j] = 0;
+        }
+    }
+
+    for (i = 0; i < ordemG; i++) {
+        aux = G[i].prim;
+        while (aux != NULL) {
+            j = aux->id;
+            graph[i][j] = 1;
+            aux = aux->p;
+        }
+    }
+}
+
+void imprimeMaiorPanelinha(Panelinhas M, int maiorPanelinha, Vert *G) {
+    int i, j;
+    printf("\nMaior(es) Panelinha(s):\n");
+    for (i = 0; i < M.count; i++) {
+        if (M.panelinhas[i].count == maiorPanelinha) {
+            for (j = 0; j < M.panelinhas[i].count; j++) {
+                printf("%s\n", G[M.panelinhas[i].vertices[j]].nome);
+            }
+            printf("\n");
+        }
+    }
+}
+
+void retornaPanelinha(Panelinhas M, Vert *G, int v) {
+    int i, j, k;
+    int amigosEncontrados = 0;
+
+    printf("Panelinha(s) com %s:\n", G[v].nome);
+    for (i = 0; i < M.count; i++) {
+        for (j = 0; j < M.panelinhas[i].count; j++) {
+            if (M.panelinhas[i].vertices[j] == v) {
+                amigosEncontrados = M.panelinhas[i].count;
+                for (k = 0; k < amigosEncontrados; k++) {
+                    printf("%s\n", G[M.panelinhas[i].vertices[k]].nome);
+                }
+            }
+        }
+    }
+    if (amigosEncontrados == 0) {
+        printf("O usuário ainda não possui amigos!\n");
     }
 }
 
@@ -271,6 +436,32 @@ int main(int argc, char *argv[]) {
     retornaMaisAmigos(G, ordemG);
 
     retornaQuantidadeAmigos(v, G, ordemG);
+
+    VertexSet R, P, X;
+    inicializaVertex(&R);
+    inicializaVertex(&P);
+    inicializaVertex(&X);
+
+    M.count = 0;
+    int a;
+    for (a = 0; a < MAX_VERTICES; a++) {
+        inicializaVertex(&M.panelinhas[a]);
+    }
+
+    int graph[MAX_VERTICES][MAX_VERTICES];
+
+    transformaGrafoMatriz(G, graph, ordemG);
+
+    int i;
+    for (i = 0; i < ordemG; i++) {
+        addVertex(&P, i);
+    }
+
+    bronKerbosch(G, graph, R, P, X);
+
+    imprimeMaiorPanelinha(M, maiorPanelinha, G);
+
+    retornaPanelinha(M, G, 5);
 
     destroiGrafo(&G, ordemG);
 
