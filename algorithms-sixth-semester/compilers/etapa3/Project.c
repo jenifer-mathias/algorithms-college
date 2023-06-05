@@ -186,24 +186,6 @@ int semic(char palavra[], int *pos) {
     return 0;
 }
 
-// /** funcao auxiliar para verificar espacos nas palavreas */
-// int verificaEspacos(char palavra[], int* pos) {
-//     if (lookahead == ' ' || lookahead == '\n' || lookahead == '\t' ||
-//     lookahead == '\0') {
-//         if (match(' ', palavra, pos) || match('\n', palavra, pos) ||
-//         match('\t', palavra, pos) || match('\0', palavra, pos)) {
-//             // Remove espaços extras
-//           if(lookahead == ' ' || lookahead == '\n' || lookahead == '\t' ||
-//           lookahead == '\0') {
-//                 verificaEspacos(palavra, pos);
-//             }
-//             return 1;
-//         }
-//         return 1;
-//     }
-//     return 0;
-// }
-
 /**  Regra 1 - aceitar declaracao de funcoes, semic, identificador e bloco */
 int programa(char palavra[], int *pos) {
     if (lookahead == 'v') {
@@ -222,7 +204,7 @@ int programa(char palavra[], int *pos) {
 int bloco(char palavra[], int *pos) {
     if (lookahead == '{') {
         match('{', palavra, pos) && parteDeclaracaoVariaveis(palavra, pos);
-        if(lookahead=='/' && lookahead=='*'){
+        if (lookahead == '/' && lookahead == '*') {
             comentario(palavra, pos);
         }
         comandoComposto(palavra, pos);
@@ -260,7 +242,7 @@ int tipoVariaveis(char palavra[], int *pos) {
 int declaracaoVariaveis(char palavra[], int *pos) {
     if (tipoVariaveis(palavra, pos) && listaIdentificadores(palavra, pos) &&
         match(';', palavra, pos)) {
-        if(lookahead=='b' || (lookahead=='i' && lookahead=='n')){
+        if (lookahead == 'b' || (lookahead == 'i' && lookahead == 'n')) {
             declaracaoVariaveis(palavra, pos);
             return 1;
         }
@@ -285,7 +267,7 @@ int listaIdentificadores(char palavra[], int *pos) {
 /** Regra 6 - <declaracao de funcoes> */
 int declaracaoFuncoes(char palavra[], int *pos) {
     declaraFuncao(palavra, pos);
-    if(lookahead=='v'){
+    if (lookahead == 'v') {
         declaracaoFuncoes(palavra, pos);
     }
     return 1;
@@ -342,8 +324,8 @@ int comandoComposto(char palavra[], int *pos) {
     if (lookahead == '_' || lookahead == 'i' || lookahead == 'p' ||
         lookahead == 'd') {
         comando(palavra, pos) && match(';', palavra, pos);
-        if(lookahead == '_' || lookahead == 'i' || lookahead == 'p' ||
-           lookahead == 'd'){
+        if (lookahead == '_' || lookahead == 'i' || lookahead == 'p' ||
+            lookahead == 'd') {
             comandoComposto(palavra, pos);
             return 1;
         }
@@ -500,18 +482,17 @@ int relacao(char palavra[], int *pos) {
         }
     } else if (lookahead == '<') {
         match('<', palavra, pos);
-        if(lookahead=='='){
+        if (lookahead == '=') {
             match('=', palavra, pos);
             return 1;
-        }
-        else if(lookahead=='>'){
+        } else if (lookahead == '>') {
             match('>', palavra, pos);
             return 1;
         }
         return 1;
     } else if (lookahead == '>') {
         match('>', palavra, pos);
-        if(lookahead=='=') {
+        if (lookahead == '=') {
             match('=', palavra, pos);
             return 1;
         }
@@ -647,7 +628,7 @@ void trataErro(bool isLexico, char *token, char *palavra, int pos, int linha) {
 }
 
 int main() {
-    char inputFilePath[] = "/home/runner/Comp/entrada.txt";
+    char inputFilePath[] = "/Users/jenifer.santos/algorithms-college/algorithms-sixth-semester/compilers/etapa3/entrada.txt";
     bool isLexico;
     int pos = 0;
     int linha = 1; // Variável para acompanhar a linha atual
@@ -664,7 +645,7 @@ int main() {
     fseek(file, 0, SEEK_SET);
 
     /** Alocação dinâmica */
-    char *palavra = (char *)malloc((fileSize + 1) * sizeof(char));
+    char *palavra = (char *) malloc((fileSize + 1) * sizeof(char));
     if (palavra == NULL) {
         printf("Erro na alocação de memória\n");
         fclose(file);
